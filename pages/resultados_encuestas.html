@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Resultados de Encuestas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; padding: 20px; }
+    .card { border-radius: 1rem; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h3 class="mb-4">Resultados de Encuestas</h3>
+
+    <!-- Filtros (solo para admin) -->
+    <div id="filtrosAdmin" class="card p-4 shadow-sm mb-4 d-none">
+      <h5>Filtros</h5>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Periodo</label>
+          <select class="form-select">
+            <option value="">Todos</option>
+            <option>2024 - Primer Semestre</option>
+            <option>2024 - Segundo Semestre</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Encuesta</label>
+          <select class="form-select">
+            <option value="">Todas</option>
+            <option>Zarit</option>
+            <option>Goldberg</option>
+            <option>Otra</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Técnico</label>
+          <input type="text" class="form-control" placeholder="Nombre del técnico">
+        </div>
+      </div>
+      <div class="text-end mt-3">
+        <button class="btn btn-outline-primary">Buscar</button>
+      </div>
+    </div>
+
+    <!-- Tabla de resultados -->
+    <div class="card p-3 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Actor</th>
+              <th>Encuesta</th>
+              <th>Periodo</th>
+              <th>Puntaje</th>
+              <th>Interpretación</th>
+              <th>Técnico</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaResultados">
+            <tr>
+              <td>Juan Pérez</td>
+              <td>Zarit</td>
+              <td>2024 - Segundo Semestre</td>
+              <td>52 / 88</td>
+              <td>Moderado</td>
+              <td>Téc. María Andrade</td>
+              <td>
+                <button class="btn btn-sm btn-outline-info">Ver Detalle</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Ana Ramírez</td>
+              <td>Goldberg</td>
+              <td>2024 - Segundo Semestre</td>
+              <td>27 / 36</td>
+              <td>Alto</td>
+              <td>Téc. Carlos Muñoz</td>
+              <td>
+                <button class="btn btn-sm btn-outline-info">Ver Detalle</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const perfil = new URLSearchParams(window.location.search).get("perfil"); // "admin" o "tecnico"
+
+    window.onload = () => {
+      if (perfil === "admin") {
+        document.getElementById("filtrosAdmin").classList.remove("d-none");
+      }
+    };
+  </script>
+
+    <!-- Modal de detalle de resultado -->
+    <div class="modal fade" id="modalDetalle" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalDetalleLabel">Detalle de Respuestas</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <h6><strong>Encuesta:</strong> Zarit</h6>
+            <h6><strong>Actor:</strong> Juan Pérez</h6>
+            <hr>
+            <ul class="list-group">
+              <li class="list-group-item d-flex justify-content-between">
+                <span>¿Siente que su vida ha cambiado desde que cuida?</span><span><strong>Frecuentemente</strong> (4 pts)</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between">
+                <span>¿Tiene problemas para dormir debido al cuidado?</span><span><strong>A veces</strong> (2 pts)</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between">
+                <span>¿Siente agotamiento emocional?</span><span><strong>Casi siempre</strong> (3 pts)</span>
+              </li>
+              <!-- Más preguntas simuladas -->
+            </ul>
+            <hr>
+            <p class="text-end"><strong>Puntaje total:</strong> 52 / 88</p>
+            <p class="text-end"><strong>Interpretación:</strong> Carga moderada</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.querySelectorAll('button.btn-outline-info').forEach(btn => {
+        btn.onclick = () => {
+          new bootstrap.Modal(document.getElementById('modalDetalle')).show();
+        };
+      });
+    </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    </body>
+    </html>
+    
+</html>

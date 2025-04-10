@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Encuestas (Admin)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; padding: 20px; }
+    .card { border-radius: 1rem; margin-bottom: 1.5rem; }
+    .peso-input { width: 100px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h3 class="mb-4">Administración de Encuestas</h3>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <button class="btn btn-success" disabled onclick="abrirModalEncuesta()">➕ Crear Encuesta</button>
+      <div class="d-flex gap-2">
+        <input type="text" class="form-control" id="filtroEncuesta" placeholder="Buscar encuesta">
+        <button class="btn btn-outline-primary" onclick="filtrarEncuestas()">Buscar</button>
+      </div>
+    </div>
+
+    <div class="card p-3 shadow-sm mb-4">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaEncuestas">
+            <tr>
+              <td>Encuesta de Bienestar</td>
+              <td>Autoevaluación general</td>
+              <td>Activa</td>
+              <td class="table-actions">
+                <button class="btn btn-sm btn-outline-warning" disabled onclick="abrirModalEncuesta('Encuesta de Bienestar')">Editar</button>
+                <button class="btn btn-sm btn-outline-info" disabled onclick="abrirParametrizacion()">Parametrizar</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarEncuesta(this)">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal de creación/edición de encuesta -->
+    <div class="modal fade" id="modalEncuesta" tabindex="-1" aria-labelledby="modalEncuestaLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalEncuestaLabel">Crear Encuesta</h5>
+            <button class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Nombre de la Encuesta</label>
+              <input type="text" class="form-control" id="nombreEncuestaInput">
+            </div>
+
+            <div class="card p-3 shadow-sm">
+              <h5>Preguntas</h5>
+              <div class="row g-3 mb-3 align-items-end">
+                <div class="col-md-4">
+                  <label class="form-label">Texto de la Pregunta</label>
+                  <input type="text" id="textoPregunta" class="form-control">
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Tipo</label>
+                  <select id="tipoPregunta" class="form-select" onchange="mostrarOpciones()">
+                    <option value="texto">Texto Libre</option>
+                    <option value="unica">Opción Única</option>
+                    <option value="multiple">Opción Múltiple</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Peso Máximo</label>
+                  <input type="number" id="pesoPregunta" class="form-control" min="1" value="10">
+                </div>
+                <div class="col-md-4" id="opcionesContainer" style="display: none;">
+                  <label class="form-label">Opciones (texto|peso por línea)</label>
+                  <textarea id="opcionesTexto" class="form-control" rows="2"></textarea>
+                </div>
+              </div>
+              <div class="text-end mb-3">
+                <button class="btn btn-primary" onclick="agregarPregunta()">➕ Agregar Pregunta</button>
+              </div>
+              <div id="preguntasLista"></div>
+              <div class="text-end mt-3"><strong>Total de Puntaje:</strong> <span id="totalPuntaje">0</span></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button class="btn btn-primary">Guardar Encuesta</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de parametrización -->
+    <div class="modal fade" id="modalParametrizacion" tabindex="-1" aria-labelledby="modalParamLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Parametrización de Resultados</h5>
+            <button class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-bordered">
+              <thead><tr><th>Desde</th><th>Hasta</th><th>Interpretación</th></tr></thead>
+              <tbody>
+                <tr><td><input type="number" class="form-control" value="0"></td><td><input type="number" class="form-control" value="50"></td><td><input type="text" class="form-control" value="Bajo"></td></tr>
+                <tr><td><input type="number" class="form-control" value="51"></td><td><input type="number" class="form-control" value="80"></td><td><input type="text" class="form-control" value="Medio"></td></tr>
+                <tr><td><input type="number" class="form-control" value="81"></td><td><input type="number" class="form-control" value="100"></td><td><input type="text" class="form-control" value="Alto"></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button class="btn btn-primary">Guardar Parámetros</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let totalAcumulado = 0;
+
+    function abrirModalEncuesta(nombre = "") {
+      document.getElementById("modalEncuestaLabel").innerText = nombre ? "Editar Encuesta" : "Crear Encuesta";
+      document.getElementById("nombreEncuestaInput").value = nombre || "";
+      document.getElementById("preguntasLista").innerHTML = "";
+      document.getElementById("totalPuntaje").textContent = "0";
+      totalAcumulado = 0;
+      new bootstrap.Modal(document.getElementById("modalEncuesta")).show();
+    }
+
+    function mostrarOpciones() {
+      const tipo = document.getElementById('tipoPregunta').value;
+      document.getElementById('opcionesContainer').style.display = (tipo === 'unica' || tipo === 'multiple') ? 'block' : 'none';
+    }
+
+    function agregarPregunta() {
+      const texto = document.getElementById('textoPregunta').value.trim();
+      const tipo = document.getElementById('tipoPregunta').value;
+      const pesoMax = parseInt(document.getElementById('pesoPregunta').value);
+      const opcionesRaw = document.getElementById('opcionesTexto').value.trim();
+
+      if (!texto || isNaN(pesoMax) || pesoMax <= 0) {
+        alert('Completa los campos de pregunta y peso correctamente.');
+        return;
+      }
+
+      let opciones = [];
+      if ((tipo === 'unica' || tipo === 'multiple') && opcionesRaw) {
+        opciones = opcionesRaw.split('\n').map(linea => {
+          const [txt, peso] = linea.split('|');
+          return { texto: txt.trim(), peso: parseFloat(peso) };
+        });
+      }
+
+      const div = document.createElement('div');
+      div.className = 'card mb-3 p-3';
+      let html = `<h6>${texto} <span class="badge bg-secondary">Tipo: ${tipo}</span> <span class="badge bg-info">Peso: ${pesoMax}</span></h6>`;
+
+      if (opciones.length > 0) {
+        html += '<ul>';
+        opciones.forEach(op => {
+          html += `<li>${op.texto} <span class="badge bg-light text-dark">Peso: ${op.peso}</span></li>`;
+        });
+        html += '</ul>';
+      }
+
+      html += `<button class="btn btn-sm btn-outline-danger mt-2" onclick="eliminarPregunta(this, ${pesoMax})">🗑 Eliminar</button>`;
+      div.innerHTML = html;
+
+      document.getElementById('preguntasLista').appendChild(div);
+
+      totalAcumulado += pesoMax;
+      document.getElementById('totalPuntaje').textContent = totalAcumulado;
+
+      document.getElementById('textoPregunta').value = "";
+      document.getElementById('pesoPregunta').value = 10;
+      document.getElementById('opcionesTexto').value = "";
+    }
+
+    function eliminarPregunta(btn, peso) {
+      btn.closest('.card').remove();
+      totalAcumulado -= peso;
+      document.getElementById('totalPuntaje').textContent = totalAcumulado;
+    }
+
+    function abrirParametrizacion() {
+      new bootstrap.Modal(document.getElementById("modalParametrizacion")).show();
+    }
+
+    function eliminarEncuesta(btn) {
+      if (confirm("¿Deseas eliminar esta encuesta?")) {
+        btn.closest("tr").remove();
+      }
+    }
+
+    function filtrarEncuestas() {
+      const filtro = document.getElementById("filtroEncuesta").value.toLowerCase();
+      document.querySelectorAll("#tablaEncuestas tr").forEach(fila => {
+        const nombre = fila.children[0].textContent.toLowerCase();
+        fila.style.display = nombre.includes(filtro) ? "" : "none";
+      });
+    }
+  </script>
+</body>
+</html>
